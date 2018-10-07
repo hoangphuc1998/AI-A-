@@ -1,3 +1,4 @@
+import sys
 #Function to calculate position in heap
 def parent(n):
     return (n-1)//2
@@ -14,6 +15,23 @@ class Coord:
             return self.x == value.x and self.y == value.y
     def __ne__(self, value):
             return not self.__eq__(value)
+    def euclide_distance(self,c):
+        return ((self.x-c.x)**2 + (self.y-c.y)**2)**(1/2)
+    def get_list_successor(self,n):
+        sucessor_list = []
+        final_list = []
+        sucessor_list.append(Coord(self.x-1,self.y-1))
+        sucessor_list.append(Coord(self.x,self.y-1))
+        sucessor_list.append(Coord(self.x+1,self.y-1))
+        sucessor_list.append(Coord(self.x+1,self.y))
+        sucessor_list.append(Coord(self.x+1,self.y+1))
+        sucessor_list.append(Coord(self.x,self.y+1))
+        sucessor_list.append(Coord(self.x-1,self.y+1))
+        sucessor_list.append(Coord(self.x-1,self.y))
+        for c in sucessor_list:
+            if c.x>=0 and c.x<n and c.y>=0 and c.y<n:
+                final_list.append(c)
+        return final_list
 
 class Cell:
     def __init__(self,coord,g,h,parent,t):
@@ -24,7 +42,11 @@ class Cell:
         self.type = t
     def get_cost(self):
         return self.g + self.h
-
+    def trace_path(self):
+        if self.parent!=None:
+            self.parent.trace_path()
+        print('('+str(self.coord.x)+','+str(self.coord.y)+')',end = ' ')
+        
 class PriorityQueue:
     def print(self):
         for i in self.heap:
@@ -49,7 +71,7 @@ class PriorityQueue:
             self.size-=1
             temp = self.heap[0]
             self.heap.pop()
-            return self.heap[0]
+            return temp
         temp = self.heap[0]
         self.heap[0] = self.heap[self.size-1]
         self.size-=1
@@ -81,26 +103,57 @@ class PriorityQueue:
                 while (i!=0 and self.heap[parent(i)].get_cost()>self.heap[i].get_cost()):
                     self.heap[i],self.heap[parent(i)] = self.heap[parent(i)],self.heap[i]
                     i = parent(i)
-        self.print()
+
+def read_input(filename):
+    with open(filename) as f:
+        n = int(f.readline())
+        x,y = [int(i) for i in next(f).split()]
+        start = Coord(x,y)
+        x,y = [int(i) for i in next(f).split()]
+        end = Coord(x,y)
+        grid_map = []
+        for i in range(n):
+            line = []
+            for index,val in enumerate(f.readline().split()):
+                new_cell = Cell(Coord(index,i),0,0,None,int(val))
+                new_cell.h = new_cell.coord.euclide_distance(end)
+                line.append(new_cell)
+            grid_map.append(line)    
+    return n,grid_map,start,end
+
+def init_list(n):
+    open_list = PriorityQueue()
+    closed_list = []
+    for _ in range(n):
+        closed_list.append([False for x in range(n)])
+    return open_list,closed_list
+
+def A_star():
+    find_path = False
+    n,grid_map,start,end = read_input('input.txt')
+    open_list,closed_list = init_list(n)
+    open_list.insert_key(grid_map[start.y][start.x])
+    while open_list.size>0:
+        q = open_list.extract()
+        if q.coord == end:
+            print("Find path")
+            print(q.g)
+            q.trace_path()
+            print()
+            find_path = True
+            return
+        elif closed_list[q.coord.y][q.coord.x]==False:
+            successor_list = q.coord.get_list_successor(n)
+            for s in successor_list:
+                cell = grid_map[s.y][s.x]
+                if cell.type == 0 and closed_list[s.y][s.x] == False:
+                    cell.g = q.g + 1
+                    cell.h = cell.coord.euclide_distance(end)
+                    cell.parent = q
+                    open_list.insert_key(cell)
+        closed_list[q.coord.y][q.coord.x] = True
+    if find_path == False:
+        print('Can\'t find path')
 
 
-open_list = PriorityQueue()
-open_list.insert_key(Cell(Coord(2,3),2,1,1,2))
-open_list.insert_key(Cell(Coord(4,3),0,2,1,2))
-open_list.insert_key(Cell(Coord(5,3),1,0,1,2))
-open_list.insert_key(Cell(Coord(6,3),5,10,1,2))
-open_list.insert_key(Cell(Coord(7,3),5,0,1,2))
-open_list.insert_key(Cell(Coord(8,3),1,3,1,2))
-open_list.insert_key(Cell(Coord(6,3),0,0,1,2))
-
-print(open_list.extract().get_cost())
-open_list.print()
-
-print(open_list.extract().get_cost())
-open_list.print()
-
-print(open_list.extract().get_cost())
-open_list.print()
-
-print(open_list.extract().get_cost())
-open_list.print()
+A_star()
