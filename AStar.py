@@ -17,7 +17,10 @@ class Coord:
             return not self.__eq__(value)
     def euclide_distance(self,c):
         return ((self.x-c.x)**2 + (self.y-c.y)**2)**(1/2)
-    def get_list_successor(self,n):
+    def calculate_heuristic(self,cell,type ="euclide"):
+        if type=="euclide":
+            return self.euclide_distance(cell)
+    def get_successor_list(self,n):
         sucessor_list = []
         final_list = []
         sucessor_list.append(Coord(self.x-1,self.y-1))
@@ -32,6 +35,8 @@ class Coord:
             if c.x>=0 and c.x<n and c.y>=0 and c.y<n:
                 final_list.append(c)
         return final_list
+    def print(self):
+        print('('+str(self.x)+','+str(self.y)+')',end = ' ')
 
 class Cell:
     def __init__(self,coord,g,h,parent,t):
@@ -43,10 +48,37 @@ class Cell:
     def get_cost(self):
         return self.g + self.h
     def trace_path(self):
-        if self.parent!=None:
-            self.parent.trace_path()
-        print('('+str(self.coord.x)+','+str(self.coord.y)+')',end = ' ')
-        
+        p = self
+        path = []
+        while p!=None:
+            path.append(p.coord)
+            p = p.parent
+        path = reversed(path)
+        return path
+
+class Map:
+    def __init__(self):
+        self.grid_map = []
+        self.n = 0
+        self.start = None
+        self.goal = None
+    def import_from_file(self,filename):
+        with open(filename) as f:
+            self.n = int(f.readline())
+            x,y = [int(i) for i in next(f).split()]
+            self.start = Coord(x,y)
+            x,y = [int(i) for i in next(f).split()]
+            self.goal = Coord(x,y)
+            for i in range(self.n):
+                line = []
+                for index,val in enumerate(f.readline().split()):
+                    new_cell = Cell(Coord(index,i),0,0,None,int(val))
+                    new_cell.h = new_cell.coord.calculate_heuristic(self.goal)
+                    line.append(new_cell)
+                self.grid_map.append(line)
+    def get_cell(self,x,y):
+        return self.grid_map[y][x]
+
 class PriorityQueue:
     def print(self):
         for i in self.heap:
@@ -104,22 +136,7 @@ class PriorityQueue:
                     self.heap[i],self.heap[parent(i)] = self.heap[parent(i)],self.heap[i]
                     i = parent(i)
 
-def read_input(filename):
-    with open(filename) as f:
-        n = int(f.readline())
-        x,y = [int(i) for i in next(f).split()]
-        start = Coord(x,y)
-        x,y = [int(i) for i in next(f).split()]
-        end = Coord(x,y)
-        grid_map = []
-        for i in range(n):
-            line = []
-            for index,val in enumerate(f.readline().split()):
-                new_cell = Cell(Coord(index,i),0,0,None,int(val))
-                new_cell.h = new_cell.coord.euclide_distance(end)
-                line.append(new_cell)
-            grid_map.append(line)    
-    return n,grid_map,start,end
+
 
 def init_list(n):
     open_list = PriorityQueue()
@@ -130,25 +147,28 @@ def init_list(n):
 
 def A_star():
     find_path = False
-    n,grid_map,start,end = read_input('input.txt')
-    open_list,closed_list = init_list(n)
-    open_list.insert_key(grid_map[start.y][start.x])
+    grid_map = Map()
+    grid_map.import_from_file(sys.argv[1])
+    open_list,closed_list = init_list(grid_map.n)
+    open_list.insert_key(grid_map.get_cell(grid_map.start.x,grid_map.start.y))
     while open_list.size>0:
         q = open_list.extract()
-        if q.coord == end:
+        if q.coord == grid_map.goal:
             print("Find path")
+            path = q.trace_path()
             print(q.g)
-            q.trace_path()
+            for c in path:
+                c.print()
             print()
             find_path = True
             return
         elif closed_list[q.coord.y][q.coord.x]==False:
-            successor_list = q.coord.get_list_successor(n)
+            successor_list = q.coord.get_successor_list(grid_map.n)
             for s in successor_list:
-                cell = grid_map[s.y][s.x]
+                cell = grid_map.get_cell(s.x,s.y)
                 if cell.type == 0 and closed_list[s.y][s.x] == False:
                     cell.g = q.g + 1
-                    cell.h = cell.coord.euclide_distance(end)
+                    cell.h = cell.coord.calculate_heuristic(grid_map.goal)
                     cell.parent = q
                     open_list.insert_key(cell)
         closed_list[q.coord.y][q.coord.x] = True
