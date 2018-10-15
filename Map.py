@@ -1,153 +1,120 @@
 from tkinter import *
-from enum import Enum
+from Panel import *
+from Square import *
 
 
-class Type(Enum):
-    Empty = 0
-    Obstacle = 1
-    Opened = 2
-    Closed = 3
-    Start = 4
-    Goal = 5
-    Path = 6
-
-
-class Croodinate:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def setCrood(self, x, y):
-        self.x = x
-        self.y = y
-
-    def getCrood(self):
-        return self.x, self.y
-
-
-class Square:
-    def __init__(self, canvas, x, y):
-        self.size = 10
-        self.crood = Croodinate(x, y)
-        self.state = Type.Empty
-        self.canvas = canvas
-        self.tagName = "Rectangle" + str(x) + str(y)
-
-        self.drawRectangle(self.canvas, self.crood)
-
-    def Switcher(self, x):
-        return {
-            0: "gray",
-            1: "black",
-            2: "white",
-            3: "white",
-            4: "green",
-            5: "blue",
-            6: "red"
-        }.get(x, "gray")
-
-    def changeStateWhenMousedownAndOver(self, event, mouseDown):
-        if(mouseDown):
-            if(self.state == Type.Obstacle):
-                self.setState(Type.Empty)
-            elif(self.state == Type.Empty):
-                self.setState(Type.Obstacle)
-
-    def mouseClick(self, event):
-        if(self.state == Type.Obstacle):
-            self.setState(Type.Empty)
-        elif(self.state == Type.Empty):
-            self.setState(Type.Obstacle)
-
-    def setRectangleOnClick(self):
-        self.canvas.tag_bind(self.tagName, "<Button-1>", self.mouseClick)
-
-    def setRectangleEnter(self, isMouseDown):
-        self.canvas.tag_bind(self.tagName, "<Enter>", lambda event,
-                             mouseDown=isMouseDown: self.changeStateWhenMousedownAndOver(event, mouseDown))
-
-    def drawRectangle(self, canvas, crood):
-        (x, y) = self.crood.getCrood()
-        color = self.Switcher(self.getState().value)
-        self.rectangle = canvas.create_rectangle(
-            x-self.size, y-self.size, x+self.size, y+self.size, fill=color, tag=self.tagName)
-
-    def setSize(self, size):
-        self.size = size
-
-    def getSize(self):
-        return self.size
-
-    def setState(self, state):
-        self.state = state
-        self.update()
-
-    def getState(self):
-        return self.state
-
-    def update(self):
-        self.canvas.delete(self.rectangle)
-        self.rectangle = self.drawRectangle(self.canvas, self.crood)
-
-
-class Map:
+class MapGUI:
     def __init__(self, master):
         mainFrame = Frame(master)
         mainFrame.grid(row=0, column=0, rowspan=100, columnspan=50)
-        self.size = 40
-        self.isMouseDown = False
+        self.__inittializeVariable()
         self.canvas = Canvas(mainFrame, bg="white", height=1500,
-                             width=1300, border=1)
-        self.map = []
+                             width=980, border=1)
         self.canvas.grid(row=0, column=0, rowspan=50, columnspan=50)
+
+        self.createButton(mainFrame)
+
+        self.map = []
         self.drawMap()
-
         self.setSquaresOnClick()
-        # self.setSquaresEnter(False)
+        self.bindMotion()
 
-        # self.canvas.bind("<Button-1>", self.mouseDown)
-        # self.canvas.bind("<ButtonRelease-1>", self.mouseUp)
+    def run(self):
+        print(self.size, self.start, self.goal, self.Heuristic, self.Algorithm)
+
+    def update(self):
+        self.canvas.delete("all")
+        self.map.clear()
+        self.map = []
+
+        self.drawMap()
+        self.setSquaresOnClick()
+        self.bindMotion()
+
+    def createButton(self, mainFrame):
+        self.runButton = Button(mainFrame, text="Run",
+                                width=20, command=self.run)
+        self.runButton.grid(row=0, column=51, rowspan=2)
+
+        self.updateButton = Button(
+            mainFrame, text="Update", width=20, command=self.update)
+        self.updateButton.grid(row=2, column=51, rowspan=2)
+
+    def __inittializeVariable(self):
+        self.x = 10
+        self.y = 10
+        self.padding = 2
+
+        self.size = 70
+        self.start = Croodinate(0, 0)
+        self.goal = Croodinate(self.size - 1, self.size - 1)
+        self.time = 0
+        self.Algorithm = "A*"
+        self.Heuristic = "Euclid"
 
     def drawMap(self):
-        y = 30
+        y = self.y
         for i in range(self.size):
             row = []
-            x = 30
+            x = self.x
             for j in range(self.size):
                 square = Square(self.canvas, x, y)
                 row.append(square)
-                x += 2*square.getSize() + 3
-            y += 2*square.getSize() + 3
+                x += 2*square.getSize() + self.padding
+            y += 2*square.getSize() + self.padding
             self.map.append(row)
+        self.map[self.start.x][self.start.y].setState(Type.Start)
+        self.map[self.goal.x][self.goal.y].setState(Type.Goal)
 
-    def setSquaresEnter(self, isMouseDown):
-        for i in range(self.size):
-            for j in range(self.size):
-                self.map[i][j].setRectangleEnter(isMouseDown)
+    def bindMotion(self):
+        self.canvas.bind("<B1-Motion>", self.handleMotion)
+
+    def isInside(self, x, y):
+        squareSize = 2*self.map[0][0].getSize() + self.padding
+        return (x >= self.x) and (y >= self.y) and (x <= squareSize*self.size) and (y <= squareSize*self.size)
+
+    def handleMotion(self, event):
+        squareSize = 2*self.map[0][0].getSize() + self.padding
+        if(self.isInside(event.x, event.y)):
+            self.map[int((event.y - self.x)/squareSize) + 1][int((event.x - self.y) /
+                                                                 squareSize) + 1].setState(Type.Obstacle)
 
     def setSquaresOnClick(self):
         for i in range(self.size):
             for j in range(self.size):
                 self.map[i][j].setRectangleOnClick()
 
-    def mouseDown(self, event):
-        print("down")
-        self.setSquaresEnter(True)
 
-    def mouseUp(self, event):
-        print("up")
-        self.setSquaresEnter(False)
+def handleApply(panel, map):
+    if(panel.allValid()):
+        map.start = Croodinate(panel.startX.get(), panel.startY.get())
+        map.goal = Croodinate(panel.goalX.get(), panel.goalY.get())
+        map.size = panel.size.get()
+        map.Algorithm = panel.Algorithm.get()
+        map.Heuristic = panel.Heuristic.get()
+        map.time = panel.time.get()
+    else:
+        panel.showMessageBox("Error", "Values are invalid!")
 
-class Panel:
-    def __inti__(self, master):
-        mainFrame = Frame(master)
-        mainFrame.grid(row=0, column=0, rowspan=100, columnspan=50)
+
 root = Tk()
 
-#root1 = Tk()
+root.title('Map')
+Map = MapGUI(root)
 
-Map = Map(root)
-#Panel = Panel(root1)
+
+def toplevel():
+    top = Toplevel()
+    top.title('Panel')
+    top.wm_geometry("400x200")
+    top.attributes('-alpha', 0.8)
+    top.configure(background="black")
+    return top
+
+
+Panel = Panel(toplevel(), 40)
+Panel.applyButton.bind("<Button-1>", lambda event,
+                       panel=Panel, map=Map: handleApply(panel, map))
+
 
 root.mainloop()
-#root1.mainloop()
