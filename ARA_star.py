@@ -1,8 +1,10 @@
 import sys
+from multiprocessing import Process
+import time
 from Structure import *
 from PriorityQueue import *
 
-def improve_path(grid_map, open_list, closed_list, incons_list, minf, heuristic = 'euclidean', epsilon = 1):
+def improve_path(grid_map, open_list, closed_list, incons_list, minf, epsilon = 1):
     while open_list.size>0 and grid_map.get_cell(grid_map.goal).get_cost(epsilon)>open_list.get_min().get_cost(epsilon):
         q = open_list.extract()
         closed_list[q.coord.y][q.coord.x] = True
@@ -26,17 +28,15 @@ def handle_result(grid_map,epsilon,output_method = 'file',output = None):
         print_output(grid_map,q,output_method,output)
 
 
-def ARA_star(heuristic = 'euclidean',epsilon = 1.5,input_method = 'file',input = 'input.txt',output_method = 'file',output = 'output.txt'):
+def ARA_star(grid_map,epsilon = 1.5,output_method = 'file',output = 'output.txt'):
     e = infinity
     minf = infinity
-    grid_map = Map()
-    grid_map.import_from_file(input,heuristic)
     open_list,closed_list,incons_list = init_list(grid_map.n)
     open_list.insert_key(grid_map.get_cell(grid_map.start),epsilon=epsilon)
-    minf = improve_path(grid_map,open_list,closed_list,incons_list,minf, heuristic,epsilon)
+    minf = improve_path(grid_map,open_list,closed_list,incons_list,minf,epsilon)
     if output_method=='file':
         output = open(output,'w')
-    handle_result(grid_map,e,output_method,output)
+    handle_result(grid_map,epsilon,output_method,output)
     e = min(epsilon,grid_map.get_cell(grid_map.goal).g/minf)
     while e>1:
         epsilon-=0.1
@@ -47,8 +47,19 @@ def ARA_star(heuristic = 'euclidean',epsilon = 1.5,input_method = 'file',input =
             new_open_list.insert_key(c,epsilon)
         open_list = new_open_list
         incons_list = []
-        minf = improve_path(grid_map,open_list,closed_list,incons_list,minf, heuristic,epsilon)
-        handle_result(grid_map,e,output_method,output)
+        minf = improve_path(grid_map,open_list,closed_list,incons_list,minf,epsilon)
+        handle_result(grid_map,epsilon,output_method,output)
         e = min(epsilon,grid_map.get_cell(grid_map.goal).g/minf)
 
-ARA_star(heuristic = 'max_step',epsilon=1.5,input=sys.argv[1])
+
+def runARA(time_limit,heuristic='euclidean',input_method='file',input='input.txt',output_method='file',output='output.txt'):
+    if __name__ == '__main__':
+        grid_map = Map()
+        if input_method=='file':
+            grid_map.import_from_file(input,heuristic)
+        action_process = Process(target=ARA_star,args=(grid_map,2,output_method,output))
+        action_process.start()
+        action_process.join(timeout=time_limit/1000)
+        action_process.terminate()
+time_limit = int(input('Enter time limit: '))
+runARA(time_limit,heuristic = 'max_step',input=sys.argv[1],output=sys.argv[2])
