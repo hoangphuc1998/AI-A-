@@ -37,7 +37,7 @@ def A_star(heuristic='euclidean', input_method='file', input='input.txt', output
                     cell.parent = q
                     open_list.insert_key(cell)
                     if output_method == 'gui':
-                        time.sleep(0.05)
+                        time.sleep(0.01)
                         output.map[s.y][s.x].setState(Type.Opened)
                         root.update()
         if output_method == 'gui':

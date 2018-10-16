@@ -12,17 +12,22 @@ class Panel(Frame):
         self.__createForm(mainFrame)
 
     def __initialzeVariable(self, size):
-        self.startX = IntVar(None, 0)
-        self.startY = IntVar(None, 0)
+        self.startX = StringVar(None, str(0))
+        self.startY = StringVar(None, str(0))
 
-        self.size = IntVar(None, size)
-        self.goalX = IntVar(None, self.size.get()-1)
-        self.goalY = IntVar(None, self.size.get()-1)
+        self.size = StringVar(None, str(size))
+        self.goalX = StringVar(None, str(int(self.size.get())-1))
+        self.goalY = StringVar(None, str(int(self.size.get())-1))
 
         self.Algorithm = StringVar(None, "A*")
         self.Heuristic = StringVar(None, "Euclid")
 
-        self.time = DoubleVar(None, 1.0)
+        self.time = StringVar(None, str(1.0))
+
+        self.istart = Coord(int(self.startX.get()), int(self.startY.get()))
+        self.igoal = Coord(int(self.goalX.get()), int(self.goalY.get()))
+        self.isize = int(self.size.get())
+        self.ftime = float(self.time.get())
 
     def __createForm(self, mainFrame):
         self.createAlgorithmField(mainFrame, 0)
@@ -111,12 +116,25 @@ class Panel(Frame):
         return True
 
     def allValid(self):
-        value = [self.size.get(), self.startX.get(), self.startY.get(),
-                 self.goalX.get(), self.goalY.get(), self.time.get()]
-        high = [70, self.size.get()-1, self.size.get()-1,
-                self.size.get()-1, self.size.get()-1, 5.0]
-        low = [2, 0, 0, 0, 0, 0.1]
-        return self.isInRange(value, low, high)
+        if(self.isInt(self.size.get()) and self.isInt(self.startX.get()) and self.isInt(self.startY.get()) and
+           self.isInt(self.goalX.get()) and self.isInt(self.goalY.get()) and self.isFloat(self.time.get())):
+
+            value = [int(self.size.get()), int(self.startX.get()), int(self.startY.get()),
+                     int(self.goalX.get()), int(self.goalY.get()), float(self.time.get())]
+            high = [70, int(self.size.get())-1, int(self.size.get())-1,
+                    int(self.size.get())-1, int(self.size.get())-1, 5.0]
+            low = [2, 0, 0, 0, 0, 0.1]
+            return self.isInRange(value, low, high)
+        return False
+
+    def convertAllToInt(self):
+        self.istart.x = int(self.startX.get())
+        self.istart.y = int(self.startY.get())
+        self.igoal.x = int(self.goalX.get())
+        self.igoal.y = int(self.goalY.get())
+
+        self.isize = int(self.size.get())
+        self.ftime = float(self.time.get())
 
     def handleReset(self):
 
@@ -133,18 +151,10 @@ class Panel(Frame):
         self.time.set(1.0)
 
     def onValidateInteger(self, P):
-        if self.isInt(P):
-            return True
-        else:
-            self.bell()
-            return False
+        return True
 
     def onValidateFloat(self, P):
-        if self.isFloat(P):
-            return True
-        else:
-            self.bell()
-            return False
+        return True
 
     def isInt(self, s):
         try:

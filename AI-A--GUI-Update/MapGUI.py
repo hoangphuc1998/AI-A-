@@ -90,12 +90,13 @@ class MapGUI:
 
 def handleApply(panel, map):
     if(panel.allValid()):
-        map.start = Coord(panel.startX.get(), panel.startY.get())
-        map.goal = Coord(panel.goalX.get(), panel.goalY.get())
-        map.size = panel.size.get()
+        panel.convertAllToInt()
+        map.start = panel.istart
+        map.goal = panel.igoal
+        map.size = panel.isize
         map.Algorithm = panel.Algorithm.get()
         map.Heuristic = panel.Heuristic.get()
-        map.time = panel.time.get()
+        map.time = panel.ftime
     else:
         panel.showMessageBox("Error", "Values are invalid!")
 
