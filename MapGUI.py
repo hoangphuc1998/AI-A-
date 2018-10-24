@@ -4,6 +4,7 @@ from Square import *
 from AStar import A_star
 from ARA_star import runARA
 
+
 class MapGUI:
     def __init__(self, master):
         self.master = master
@@ -14,24 +15,48 @@ class MapGUI:
                              width=980, border=1)
         self.canvas.grid(row=0, column=0, rowspan=50, columnspan=50)
 
-        self.createButton(mainFrame)
-
         self.map = []
         self.drawMap()
+        self.createButton(mainFrame)
         self.setSquaresOnClick()
         self.bindMotion()
 
+    def __inittializeVariable(self):
+        self.x = 10
+        self.y = 10
+        self.padding = 2
+
+        self.size = 40
+        self.start = Coord(0, 0)
+        self.goal = Coord(self.size - 1, self.size - 1)
+        self.time = 0
+        self.Algorithm = "A*"
+        self.Heuristic = "Euclid"
+
     def run(self):
+        self.disableAllButton()
         heuristic = "euclidean"
         if self.Heuristic == "My heuristic":
             heuristic = "max_step"
         if self.Algorithm == "A*":
             A_star(input_method='gui', input=self,
-               output_method='gui', output=self, root=self.master, heuristic=heuristic)
+                   output_method='gui', output=self, root=self.master, heuristic=heuristic)
         else:
             #timer = self.runButton.after(int(self.time*1000),runARA,(self.time,heuristic,'gui',self,'gui',self,self.master))
-            runARA(10000,heuristic=heuristic,input_method='gui',input=self,output_method='gui',output=self,root=self.master)
-            #self.runButton.after_cancel(timer)
+            runARA(10000, heuristic=heuristic, input_method='gui',
+                   input=self, output_method='gui', output=self, root=self.master)
+            # self.runButton.after_cancel(timer)
+        self.enableAllButton()
+
+    def disableAllButton(self):
+        self.runButton['state'] = 'disabled'
+        self.updateButton['state'] = 'disabled'
+        self.resetButton['state'] = 'disabled'
+
+    def enableAllButton(self):
+        self.runButton['state'] = 'normal'
+        self.updateButton['state'] = 'normal'
+        self.resetButton['state'] = 'normal'
 
     def update(self):
         self.canvas.delete("all")
@@ -42,26 +67,38 @@ class MapGUI:
         self.setSquaresOnClick()
         self.bindMotion()
 
+    def reset(self):
+        for i in range(self.size):
+            for j in range(self.size):
+                if(self.map[i][j].state != Type.Obstacle):
+                    self.map[i][j].setState(Type.Empty)
+
     def createButton(self, mainFrame):
+        row = 0
         self.runButton = Button(mainFrame, text="Run",
                                 width=20, command=self.run)
-        self.runButton.grid(row=0, column=51, rowspan=2)
+        self.runButton.grid(row=row, column=50, rowspan=2, columnspan=5)
 
+        row += 2
+        self.resetButton = Button(
+            mainFrame, text="Reset", width=20, command=self.reset)
+        self.resetButton.grid(row=row, column=50, rowspan=2, columnspan=5)
+
+        row += 2
         self.updateButton = Button(
             mainFrame, text="Update", width=20, command=self.update)
-        self.updateButton.grid(row=2, column=51, rowspan=2)
+        self.updateButton.grid(row=row, column=50, rowspan=2, columnspan=5)
 
-    def __inittializeVariable(self):
-        self.x = 10
-        self.y = 10
-        self.padding = 2
-
-        self.size = 30
-        self.start = Coord(0, 0)
-        self.goal = Coord(self.size - 1, self.size - 1)
-        self.time = 0
-        self.Algorithm = "A*"
-        self.Heuristic = "Euclid"
+        row += 10
+        typeName = ['Empty', 'Obstacle', 'Opened',
+                    'Closed', 'Start', 'Goal', 'Path', 'Incons']
+        for i in range(len(typeName)):
+            color = self.map[0][0].Switcher(i)
+            Label(mainFrame, bg=color, width="2").grid(
+                row=row, column=50, rowspan=2)
+            Label(mainFrame, text=typeName[i]).grid(
+                row=row, column=52, rowspan=2)
+            row += 1
 
     def drawMap(self):
         y = self.y
@@ -82,13 +119,13 @@ class MapGUI:
 
     def isInside(self, x, y):
         squareSize = 2*self.map[0][0].getSize() + self.padding
-        return (x >= self.x) and (y >= self.y) and (x <= squareSize*self.size) and (y <= squareSize*self.size)
+        return (x >= self.x) and (y >= self.y) and (x <= squareSize*self.size + 3) and (y <= squareSize*self.size + 3)
 
     def handleMotion(self, event):
         squareSize = 2*self.map[0][0].getSize() + self.padding
         if(self.isInside(event.x, event.y)):
-            self.map[int((event.y - self.y)/squareSize) + 1][int((event.x - self.x) /
-                                                                 squareSize) + 1].setState(Type.Obstacle)
+            self.map[int((event.y - self.y)/squareSize)][int((event.x - self.x) /
+                                                             squareSize)].setState(Type.Obstacle)
 
     def setSquaresOnClick(self):
         for i in range(self.size):
