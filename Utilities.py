@@ -31,13 +31,13 @@ class Coord:
         return ((self.x-c.x)**2 + (self.y-c.y)**2)**(1/2)
     # Calculate heuristic by calculate max step from a cell to another cell
     # Formula for heuristic between cell a and b: max(|a.x-b.x|,|a.y-b.y)
-    def max_step(self,c):
+    def min_step(self,c):
         return max(abs(self.x-c.x),abs(self.y-c.y))
     def calculate_heuristic(self,cell,heuristic ='euclidean'):
         if heuristic=='euclidean':
             return self.euclidean_distance(cell)
-        if heuristic == 'max_step':
-            return self.max_step(cell)
+        if heuristic == 'min_step':
+            return self.min_step(cell)
     # Get next available steps. List of cells is sort clockwise
     def get_successor_list(self,n):
         sucessor_list = []

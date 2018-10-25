@@ -12,7 +12,7 @@ def improve_path(grid_map, open_list, closed_list, incons_list, minf, epsilon = 
             output.map[q.coord.y][q.coord.x].setState(Type.Closed)
         for s in q.coord.get_successor_list(grid_map.n):
             cell = grid_map.get_cell(s)
-            if cell.type!=1 and cell.get_cost(epsilon) > q.g + 1 + epsilon*cell.h:
+            if cell.type!=1 and cell.g > q.g + 1:
                 cell.g = q.g+1
                 cell.parent = q
                 if minf>cell.get_cost(epsilon = 1):
@@ -20,7 +20,7 @@ def improve_path(grid_map, open_list, closed_list, incons_list, minf, epsilon = 
                 if closed_list[s.y][s.x]==False:
                     open_list.insert_key(cell,epsilon)
                     if output_method == 'gui':
-                        time.sleep(0.05)
+                        time.sleep(0.02)
                         output.map[cell.coord.y][cell.coord.x].setState(Type.Opened)
                         root.update()
                 else:
@@ -39,17 +39,19 @@ def handle_result(grid_map,epsilon,output_method = 'file',output = None):
 
 
 def ARA_star(grid_map,epsilon = 1.5,output_method = 'file',output = 'output.txt',root = 'abc'):
+    if output_method == 'file':
+        output = open(output,'w')
     e = infinity
     minf = infinity
     open_list,closed_list,incons_list = init_list(grid_map.n)
     open_list.insert_key(grid_map.get_cell(grid_map.start),epsilon=epsilon)
     minf = improve_path(grid_map,open_list,closed_list,incons_list,minf,epsilon,output_method,output,root)
-    if output_method=='file':
-        output = open(output,'w')
     handle_result(grid_map,epsilon,output_method,output)
     e = min(epsilon,grid_map.get_cell(grid_map.goal).g/minf)
     while e>1:
         epsilon-=0.1
+        if abs(epsilon-1)<1e-5:
+            epsilon = 1
         new_open_list,closed_list,_ = init_list(grid_map.n)
         for c in incons_list:
             new_open_list.insert_key(c,epsilon)
@@ -65,19 +67,27 @@ def ARA_star(grid_map,epsilon = 1.5,output_method = 'file',output = 'output.txt'
         e = min(epsilon,grid_map.get_cell(grid_map.goal).g/minf)
 
 
-def runARA(time_limit,heuristic='euclidean',input_method='file',input='input.txt',output_method='file',output='output.txt',root = 'abc'):
+def runARA(time_limit,epsilon = 1.5,heuristic='euclidean',input_method='file',input='input.txt',output_method='file',output='output.txt',root = 'abc'):
     grid_map = Map()
     if input_method=='file':
         grid_map.import_from_file(input,heuristic)
     elif input_method == 'gui':
         grid_map.import_from_gui(input,heuristic)
     if output_method == 'gui':
-        ARA_star(grid_map,2,output_method,output,root = root)
+        ARA_star(grid_map= grid_map,epsilon=epsilon,output_method = output_method,output = output,root = root)
     else:
-        action_process = Process(target=ARA_star,args=(grid_map,2,output_method,output))
+        
+        action_process = Process(target=ARA_star,args=(grid_map,epsilon,output_method,output,))
         action_process.start()
         action_process.join(timeout=time_limit/1000)
         action_process.terminate()
 if __name__ == '__main__':
     time_limit = int(input('Enter time limit: '))
-    runARA(time_limit,heuristic = 'max_step',input=sys.argv[1],output=sys.argv[2])
+    epsilon = float(input('Enter start epsilon: '))
+    c = 3
+    while c!=1 and c!=2:
+        c = int(input('Choose heuristic (1: Euclidean, 2: Our heuristic): '))
+    heuristic = 'euclidean'
+    if c==2:
+        heuristic = 'min_step'
+    runARA(time_limit,epsilon = epsilon,heuristic = 'min_step',input=sys.argv[1],output=sys.argv[2])

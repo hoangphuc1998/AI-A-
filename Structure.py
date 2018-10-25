@@ -63,6 +63,18 @@ class Map:
                 line.append(new_cell)
             self.grid_map.append(line)
         self.get_cell(self.start).g = 0
+        f = open('input.txt','w')
+        f.write(str(self.n)+'\n')
+        f.write(str(self.start.x) + ' '+ str(self.start.y)+'\n')
+        f.write(str(self.goal.x)+' '+str(self.goal.y)+'\n')
+        for y in range(self.n):
+            for x in range(self.n):
+                if self.grid_map[y][x].type==1:
+                    f.write('1 ')
+                else:
+                    f.write('0 ')
+            f.write('\n')
+        f.close()
         
     #Get cell at coordinate (x,y)
     def get_cell(self,coord):
@@ -101,6 +113,8 @@ def print_output(grid_map,q,output_method,file):
             file.write('('+str(c.x)+','+str(c.y)+') ')
         file.write('\n')
         grid_map.print_map(file)
+        file.write('\n')
     elif output_method == 'gui':
         for c in path:
             file.map[c.y][c.x].setState(Type.Path)
+    print(q.g+1)
