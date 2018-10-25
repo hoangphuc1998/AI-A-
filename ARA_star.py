@@ -1,4 +1,5 @@
 import sys
+from os import path
 from multiprocessing import Process
 import time
 from Structure import *
@@ -6,7 +7,7 @@ from PriorityQueue import *
 
 def improve_path(grid_map, open_list, closed_list, incons_list, minf, epsilon = 1,output_method = 'file',output = 'output.txt',root = 'abc'):
     while open_list.size>0 and grid_map.get_cell(grid_map.goal).get_cost(epsilon)>open_list.get_min().get_cost(epsilon):
-        q = open_list.extract()
+        q = open_list.extract(epsilon=epsilon)
         closed_list[q.coord.y][q.coord.x] = True
         if output_method == 'gui':
             output.map[q.coord.y][q.coord.x].setState(Type.Closed)
@@ -29,13 +30,18 @@ def improve_path(grid_map, open_list, closed_list, incons_list, minf, epsilon = 
                         output.map[cell.coord.y][cell.coord.x].setState(Type.Incons)
     return minf
 
-def handle_result(grid_map,epsilon,output_method = 'file',output = None):
+def handle_result(grid_map,epsilon,output_method = 'file',output = None,closed_list=[]):
     q = grid_map.get_cell(grid_map.goal)
     if output_method == 'file' and output!=None:
-        output.write(str(epsilon)+'\n')
+        output.write('epsilon = ' + str(epsilon)+'\n')
         print_output(grid_map,q,output_method,output)
     elif output_method == 'gui':
         print_output(grid_map, q, output_method, output)
+        for y in range(grid_map.n):
+            for x in range(grid_map.n):
+                if closed_list[y][x]==True and output.map[y][x].state !=Type.Path:
+                    output.map[y][x].setState(Type.Empty)
+        output.master.update()
 
 
 def ARA_star(grid_map,epsilon = 1.5,output_method = 'file',output = 'output.txt',root = 'abc'):
@@ -46,7 +52,7 @@ def ARA_star(grid_map,epsilon = 1.5,output_method = 'file',output = 'output.txt'
     open_list,closed_list,incons_list = init_list(grid_map.n)
     open_list.insert_key(grid_map.get_cell(grid_map.start),epsilon=epsilon)
     minf = improve_path(grid_map,open_list,closed_list,incons_list,minf,epsilon,output_method,output,root)
-    handle_result(grid_map,epsilon,output_method,output)
+    handle_result(grid_map,epsilon,output_method,output,closed_list)
     e = min(epsilon,grid_map.get_cell(grid_map.goal).g/minf)
     while e>1:
         epsilon-=0.1
@@ -63,12 +69,14 @@ def ARA_star(grid_map,epsilon = 1.5,output_method = 'file',output = 'output.txt'
         open_list = new_open_list
         incons_list = []
         minf = improve_path(grid_map,open_list,closed_list,incons_list,minf,epsilon,output_method,output,root)
-        handle_result(grid_map,epsilon,output_method,output)
+        handle_result(grid_map,epsilon,output_method,output,closed_list)
         e = min(epsilon,grid_map.get_cell(grid_map.goal).g/minf)
 
 
 def runARA(time_limit,epsilon = 1.5,heuristic='euclidean',input_method='file',input='input.txt',output_method='file',output='output.txt',root = 'abc'):
     grid_map = Map()
+    print(epsilon)
+    print(heuristic)
     if input_method=='file':
         grid_map.import_from_file(input,heuristic)
     elif input_method == 'gui':
@@ -76,7 +84,6 @@ def runARA(time_limit,epsilon = 1.5,heuristic='euclidean',input_method='file',in
     if output_method == 'gui':
         ARA_star(grid_map= grid_map,epsilon=epsilon,output_method = output_method,output = output,root = root)
     else:
-        
         action_process = Process(target=ARA_star,args=(grid_map,epsilon,output_method,output,))
         action_process.start()
         action_process.join(timeout=time_limit/1000)
@@ -88,6 +95,10 @@ if __name__ == '__main__':
     while c!=1 and c!=2:
         c = int(input('Choose heuristic (1: Euclidean, 2: Our heuristic): '))
     heuristic = 'euclidean'
+    print(c)
     if c==2:
         heuristic = 'min_step'
-    runARA(time_limit,epsilon = epsilon,heuristic = 'min_step',input=sys.argv[1],output=sys.argv[2])
+    runARA(time_limit,epsilon = epsilon,heuristic = heuristic,input=sys.argv[1],output=sys.argv[2])
+    if path.getsize(sys.argv[2])==0:
+        f=open(sys.argv[2],'w')
+        f.write('-1')

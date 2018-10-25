@@ -40,7 +40,7 @@ class MapGUI:
             heuristic = "min_step"
         #print(heuristic)
         if self.Algorithm == "A*":
-            A_star(input_method='file', input='input.txt',
+            A_star(input_method='gui', input=self,
                    output_method='gui', output=self, root=self.master, heuristic=heuristic)
         else:
             #timer = self.runButton.after(int(self.time*1000),runARA,(self.time,heuristic,'gui',self,'gui',self,self.master))

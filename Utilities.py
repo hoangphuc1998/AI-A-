@@ -10,6 +10,7 @@ class Type(Enum):
     Goal = 5
     Path = 6
     Incons = 7
+    PreviousPaths = 8
 
 
 # Class Coord save coordinate of a cell

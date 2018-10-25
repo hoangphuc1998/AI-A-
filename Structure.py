@@ -23,6 +23,7 @@ class Cell:
             p = p.parent
         path = reversed(path)
         return path
+    
 
 class Map:
     def __init__(self,n = 0,start = None,goal = None):
@@ -63,18 +64,18 @@ class Map:
                 line.append(new_cell)
             self.grid_map.append(line)
         self.get_cell(self.start).g = 0
-        f = open('input.txt','w')
-        f.write(str(self.n)+'\n')
-        f.write(str(self.start.x) + ' '+ str(self.start.y)+'\n')
-        f.write(str(self.goal.x)+' '+str(self.goal.y)+'\n')
-        for y in range(self.n):
-            for x in range(self.n):
-                if self.grid_map[y][x].type==1:
-                    f.write('1 ')
-                else:
-                    f.write('0 ')
-            f.write('\n')
-        f.close()
+        # f = open('input.txt','w')
+        # f.write(str(self.n)+'\n')
+        # f.write(str(self.start.x) + ' '+ str(self.start.y)+'\n')
+        # f.write(str(self.goal.x)+' '+str(self.goal.y)+'\n')
+        # for y in range(self.n):
+        #     for x in range(self.n):
+        #         if self.grid_map[y][x].type==1:
+        #             f.write('1 ')
+        #         else:
+        #             f.write('0 ')
+        #     f.write('\n')
+        # f.close()
         
     #Get cell at coordinate (x,y)
     def get_cell(self,coord):
@@ -97,7 +98,6 @@ class Map:
                     if cell.symbol == 'x':
                         cell.symbol = '-'
                 file.write('\n')
-
 
 # Print output when find path
 def print_output(grid_map,q,output_method,file):
