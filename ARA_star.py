@@ -41,6 +41,10 @@ def handle_result(grid_map,epsilon,output_method = 'file',output = None,closed_l
             for x in range(grid_map.n):
                 if closed_list[y][x]==True and output.map[y][x].state !=Type.Path:
                     output.map[y][x].setState(Type.Empty)
+        path = q.trace_path()
+        if epsilon>1:
+            for c in path:
+                output.map[c.y][c.x].setState(Type.PreviousPaths)
         output.master.update()
 
 
@@ -56,8 +60,9 @@ def ARA_star(grid_map,epsilon = 1.5,output_method = 'file',output = 'output.txt'
     e = min(epsilon,grid_map.get_cell(grid_map.goal).g/minf)
     while e>1:
         epsilon-=0.1
-        if abs(epsilon-1)<1e-5:
-            epsilon = 1
+        epsilon = round(epsilon,1)
+        if output_method=='gui':
+            output.setEpsilon(epsilon)
         new_open_list,closed_list,_ = init_list(grid_map.n)
         for c in incons_list:
             new_open_list.insert_key(c,epsilon)
@@ -75,8 +80,6 @@ def ARA_star(grid_map,epsilon = 1.5,output_method = 'file',output = 'output.txt'
 
 def runARA(time_limit,epsilon = 1.5,heuristic='euclidean',input_method='file',input='input.txt',output_method='file',output='output.txt',root = 'abc'):
     grid_map = Map()
-    print(epsilon)
-    print(heuristic)
     if input_method=='file':
         grid_map.import_from_file(input,heuristic)
     elif input_method == 'gui':
@@ -95,7 +98,6 @@ if __name__ == '__main__':
     while c!=1 and c!=2:
         c = int(input('Choose heuristic (1: Euclidean, 2: Our heuristic): '))
     heuristic = 'euclidean'
-    print(c)
     if c==2:
         heuristic = 'min_step'
     runARA(time_limit,epsilon = epsilon,heuristic = heuristic,input=sys.argv[1],output=sys.argv[2])

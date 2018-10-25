@@ -117,4 +117,4 @@ def print_output(grid_map,q,output_method,file):
     elif output_method == 'gui':
         for c in path:
             file.map[c.y][c.x].setState(Type.Path)
-    print(q.g+1)
+    #print(q.g+1)

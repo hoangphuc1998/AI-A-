@@ -61,11 +61,9 @@ class PriorityQueue:
         if i>=self.size:
             self.insert_new_key(cell,epsilon)
         else:
-            if self.heap[i].get_cost(epsilon) > cell.get_cost(epsilon):
-                self.heap[i] = cell
-                while (i>0 and self.heap[parent(i)].get_cost(epsilon)>self.heap[i].get_cost(epsilon)):
-                    self.heap[i],self.heap[parent(i)] = self.heap[parent(i)],self.heap[i]
-                    i = parent(i)
+            while (i>0 and self.heap[parent(i)].get_cost(epsilon)>self.heap[i].get_cost(epsilon)):
+                self.heap[i],self.heap[parent(i)] = self.heap[parent(i)],self.heap[i]
+                i = parent(i)
 
 # Init container used by A* and ARA* (open_list, closed_list, incons_list)
 def init_list(n):

@@ -19,7 +19,8 @@ class Square:
             4: "green",  # Start
             5: "blue",  # Goal
             6: "red",  # Path
-            7: "purple"  # Incons
+            7: "purple",
+            8: "orange"  # Incons
         }.get(x, "gray")
 
     def changeStateWhenMousedownAndOver(self, event, mouseDown):
@@ -43,7 +44,8 @@ class Square:
 
     def setState(self, state):
         if self.state != Type.Start and self.state != Type.Goal:
-            self.state = state
+            if self.state!=Type.PreviousPaths or state == Type.Path:
+                self.state = state
         self.update()
 
     def setStartOrGoal(self, state):

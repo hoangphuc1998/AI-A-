@@ -22,7 +22,7 @@ class Panel(Frame):
         self.Algorithm = StringVar(None, "A*")
         self.Heuristic = StringVar(None, "Euclid")
 
-        self.epsilon = StringVar(None, str(1.0))
+        self.epsilon = StringVar(None, str(1.5))
 
         self.istart = Coord(int(self.startX.get()), int(self.startY.get()))
         self.igoal = Coord(int(self.goalX.get()), int(self.goalY.get()))
@@ -148,7 +148,7 @@ class Panel(Frame):
         self.Algorithm.set("A*")
         self.Heuristic.set("Euclid")
 
-        self.epsilon.set(1.0)
+        self.epsilon.set(str(1.5))
 
     def onValidateInteger(self, P):
         return True

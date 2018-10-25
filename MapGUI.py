@@ -31,7 +31,8 @@ class MapGUI:
         self.size = 40
         self.start = Coord(0, 0)
         self.goal = Coord(self.size - 1, self.size-1)
-        self.epsilon = 0.5
+        self.epsilon = 1.5
+        self.oldEpsilon = 1.5
         self.Algorithm = "A*"
         self.Heuristic = "Euclid"
 
@@ -47,7 +48,7 @@ class MapGUI:
         else:
             # timer = self.runButton.after(int(self.time*1000),runARA,(self.time,heuristic,'gui',self,'gui',self,self.master))
             runARA(10000, heuristic=heuristic, input_method='gui',
-                   input=self, output_method='gui', output=self, root=self.master, epsilon=2.5)
+                   input=self, output_method='gui', output=self, root=self.master, epsilon=self.epsilon)
             # self.runButton.after_cancel(timer)
         self.enableAllButton()
 
@@ -89,18 +90,19 @@ class MapGUI:
         self.setTypeWithCoord(event.x, event.y, Type.Obstacle)
 
     def handleMouseWheel(self, event):
-        if event.num == 5 or event.delta == -120:
-            if(self.size >= 70):
-                return
-            self.size += 2
-            self.goal.set_coord(self.size - 1, self.size - 1)
-            self.update()
-        if event.num == 4 or event.delta == 120:
-            if(self.size <= 4):
-                return
-            self.size -= 2
-            self.goal.set_coord(self.size - 1, self.size - 1)
-            self.update()
+        if self.runButton['state'] == 'normal':
+            if event.num == 5 or event.delta == -120:
+                if(self.size >= 70):
+                    return
+                self.size += 2
+                self.goal.set_coord(self.size - 1, self.size - 1)
+                self.update()
+            if event.num == 4 or event.delta == 120:
+                if(self.size <= 4):
+                    return
+                self.size -= 2
+                self.goal.set_coord(self.size - 1, self.size - 1)
+                self.update()
 
     def drawMap(self):
         squareSize = self.switchSize(self.size)
@@ -134,13 +136,13 @@ class MapGUI:
         self.updateButton.grid(row=row, column=50, rowspan=2, columnspan=5)
 
         row += 5
-        self.epsilonLabel = Label(mainFrame, text=str(
+        self.epsilonLabel = Label(mainFrame, text='Epsilon: '+ str(
             self.epsilon), fg="red", font="20")
         self.epsilonLabel.grid(row=row, column=50, rowspan=2, columnspan=5)
 
-        row += 10
+        row += 5
         typeName = ['Empty', 'Obstacle', 'Opened',
-                    'Closed', 'Start', 'Goal', 'Path', 'Incons']
+                    'Closed', 'Start', 'Goal', 'Path', 'Incons', 'Previous Paths']
         for i in range(len(typeName)):
             color = self.map[0][0].Switcher(i)
             Label(mainFrame, bg=color, width="2").grid(
@@ -156,12 +158,15 @@ class MapGUI:
 
         self.drawMap()
         self.bindCanvas()
+        self.setEpsilon(self.oldEpsilon)
 
     def reset(self):
         for i in range(self.size):
             for j in range(self.size):
                 if(self.map[i][j].state != Type.Obstacle):
                     self.map[i][j].setState(Type.Empty)
+        self.setEpsilon(self.oldEpsilon)
+        
 
     def changeStart(self, x, y):
         self.map[self.start.y][self.start.x].setStartOrGoal(Type.Empty)
@@ -209,7 +214,7 @@ class MapGUI:
         self.epsilonLabel['text'] = self.epsilon
 
     def switchSize(self, x):
-        return 420/x
+        return 360/x
 
 
 def handleApply(panel, map):
@@ -221,6 +226,7 @@ def handleApply(panel, map):
         map.Algorithm = panel.Algorithm.get()
         map.Heuristic = panel.Heuristic.get()
         map.epsilon = panel.fepsilon
+        map.oldEpsilon = map.epsilon
     else:
         panel.showMessageBox("Error", "Values are invalid!")
 
