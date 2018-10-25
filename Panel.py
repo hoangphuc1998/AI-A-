@@ -22,12 +22,12 @@ class Panel(Frame):
         self.Algorithm = StringVar(None, "A*")
         self.Heuristic = StringVar(None, "Euclid")
 
-        self.time = StringVar(None, str(1.0))
+        self.epsilon = StringVar(None, str(1.0))
 
         self.istart = Coord(int(self.startX.get()), int(self.startY.get()))
         self.igoal = Coord(int(self.goalX.get()), int(self.goalY.get()))
         self.isize = int(self.size.get())
-        self.ftime = float(self.time.get())
+        self.fepsilon = float(self.epsilon.get())
 
     def __createForm(self, mainFrame):
         self.createAlgorithmField(mainFrame, 0)
@@ -36,7 +36,7 @@ class Panel(Frame):
         self.createSizeField(mainFrame, 4)
         self.createStartField(mainFrame, 7)
         self.createGoalField(mainFrame, 9)
-        self.createTimeField(mainFrame, 11)
+        self.createEpsilonField(mainFrame, 11)
         self.createButton(mainFrame, 14)
 
     def createAlgorithmField(self, mainFrame, row):
@@ -91,12 +91,12 @@ class Panel(Frame):
         Entry(mainFrame, textvariable=self.goalY, bg="black", fg="white", insertbackground="white", bd=0, validate="key",
               validatecommand=validateInteger).grid(row=row, column=4)
 
-    def createTimeField(self, mainFrame, row):
+    def createEpsilonField(self, mainFrame, row):
         validateFloat = (self.register(
             self.onValidateFloat), '%P')
-        Label(mainFrame, text="Time ", bg="black",
+        Label(mainFrame, text="Epsilon ", bg="black",
               fg="white").grid(row=row, column=0, rowspan=3)
-        Entry(mainFrame, textvariable=self.time, bg="black", fg="white", insertbackground="white", bd=0, validate="key", validatecommand=validateFloat).grid(
+        Entry(mainFrame, textvariable=self.epsilon, bg="black", fg="white", insertbackground="white", bd=0, validate="key", validatecommand=validateFloat).grid(
             row=row, column=1, columnspan=3)
 
     def createButton(self, mainFrame, row):
@@ -117,10 +117,10 @@ class Panel(Frame):
 
     def allValid(self):
         if(self.isInt(self.size.get()) and self.isInt(self.startX.get()) and self.isInt(self.startY.get()) and
-           self.isInt(self.goalX.get()) and self.isInt(self.goalY.get()) and self.isFloat(self.time.get())):
+           self.isInt(self.goalX.get()) and self.isInt(self.goalY.get()) and self.isFloat(self.epsilon.get())):
 
             value = [int(self.size.get()), int(self.startX.get()), int(self.startY.get()),
-                     int(self.goalX.get()), int(self.goalY.get()), float(self.time.get())]
+                     int(self.goalX.get()), int(self.goalY.get()), float(self.epsilon.get())]
             high = [70, int(self.size.get())-1, int(self.size.get())-1,
                     int(self.size.get())-1, int(self.size.get())-1, 5.0]
             low = [2, 0, 0, 0, 0, 0.1]
@@ -134,7 +134,7 @@ class Panel(Frame):
         self.igoal.y = int(self.goalY.get())
 
         self.isize = int(self.size.get())
-        self.ftime = float(self.time.get())
+        self.fepsilon = float(self.epsilon.get())
 
     def handleReset(self):
 
@@ -148,7 +148,7 @@ class Panel(Frame):
         self.Algorithm.set("A*")
         self.Heuristic.set("Euclid")
 
-        self.time.set(1.0)
+        self.epsilon.set(1.0)
 
     def onValidateInteger(self, P):
         return True
