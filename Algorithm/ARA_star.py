@@ -1,11 +1,11 @@
 import sys
 sys.path.insert(0, '../Structure')
 from os import path
-from multiprocessing import Process
+from threading import Thread, Event
 import time
 from Structure import *
 from PriorityQueue import *
-
+stop_it = Event()
 def improve_path(grid_map, open_list, closed_list, incons_list, minf, epsilon = 1,output_method = 'file',output = 'output.txt',root = 'abc'):
     while open_list.size>0 and grid_map.get_cell(grid_map.goal).get_cost(epsilon)>open_list.get_min().get_cost(epsilon):
         q = open_list.extract(epsilon=epsilon)
@@ -29,6 +29,8 @@ def improve_path(grid_map, open_list, closed_list, incons_list, minf, epsilon = 
                     incons_list.append(cell)
                     if output_method == 'gui':
                         output.map[cell.coord.y][cell.coord.x].setState(Type.Incons)
+        if stop_it.is_set():
+            return minf
     return minf
 
 def handle_result(grid_map,epsilon,output_method = 'file',output = None,closed_list=[]):
@@ -57,8 +59,11 @@ def ARA_star(grid_map,epsilon = 1.5,output_method = 'file',output = 'output.txt'
     open_list,closed_list,incons_list = init_list(grid_map.n)
     open_list.insert_key(grid_map.get_cell(grid_map.start),epsilon=epsilon)
     minf = improve_path(grid_map,open_list,closed_list,incons_list,minf,epsilon,output_method,output,root)
+    if stop_it.is_set():
+        return
     handle_result(grid_map,epsilon,output_method,output,closed_list)
     e = min(epsilon,grid_map.get_cell(grid_map.goal).g/minf)
+    
     while e>1:
         epsilon-=0.1
         epsilon = round(epsilon,1)
@@ -77,6 +82,8 @@ def ARA_star(grid_map,epsilon = 1.5,output_method = 'file',output = 'output.txt'
         minf = improve_path(grid_map,open_list,closed_list,incons_list,minf,epsilon,output_method,output,root)
         handle_result(grid_map,epsilon,output_method,output,closed_list)
         e = min(epsilon,grid_map.get_cell(grid_map.goal).g/minf)
+        if stop_it.is_set():
+            break
 
 
 def runARA(time_limit,epsilon = 1.5,heuristic='euclidean',input_method='file',input='input.txt',output_method='file',output='output.txt',root = 'abc'):
@@ -88,11 +95,13 @@ def runARA(time_limit,epsilon = 1.5,heuristic='euclidean',input_method='file',in
     if output_method == 'gui':
         ARA_star(grid_map= grid_map,epsilon=epsilon,output_method = output_method,output = output,root = root)
     else:
-        action_process = Process(target=ARA_star,args=(grid_map,epsilon,output_method,output,))
+        action_process = Thread(target=ARA_star,args=(grid_map,epsilon,output_method,output,))
         action_process.start()
         action_process.join(timeout=time_limit/1000)
-        action_process.terminate()
-if __name__ == '__main__':
+        stop_it.set()
+        #action_process.terminate()
+
+def main_ARA_star():
     time_limit = int(input('Enter time limit: '))
     epsilon = float(input('Enter start epsilon: '))
     c = 3
@@ -105,3 +114,5 @@ if __name__ == '__main__':
     if path.getsize(sys.argv[2])==0:
         f=open(sys.argv[2],'w')
         f.write('-1')
+if __name__ == '__main__':
+    main_ARA_star()

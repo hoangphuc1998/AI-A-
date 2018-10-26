@@ -171,6 +171,7 @@ class MapGUI:
         self.drawMap()
         self.bindCanvas()
         self.setEpsilon(self.oldEpsilon)
+        self.setPathCount(0)
 
     def reset(self):
         for i in range(self.size):
@@ -181,6 +182,7 @@ class MapGUI:
                     self.map[i][j].setState(Type.Empty)
 
         self.setEpsilon(self.oldEpsilon)
+        self.setPathCount(0)
 
 
     def changeStart(self, x, y):
