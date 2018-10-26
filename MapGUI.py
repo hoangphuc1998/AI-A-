@@ -252,6 +252,4 @@ Map = MapGUI(root)
 Panel = Panel(toplevel(), 40)
 Panel.applyButton.bind("<Button-1>", lambda event,
                     panel=Panel, map=Map: handleApply(panel, map))
-def main_gui():
-    root.mainloop()
-main_gui()
+root.mainloop()
