@@ -137,7 +137,7 @@ class MapGUI:
         self.updateButton.grid(row=row, column=50, rowspan=2, columnspan=5)
 
         row += 5
-        self.epsilonLabel = Label(mainFrame, text='Epsilon: '+ str(
+        self.epsilonLabel = Label(mainFrame, text=str(
             self.epsilon), fg="red", font="20")
         self.epsilonLabel.grid(row=row, column=50, rowspan=2, columnspan=5)
 
@@ -234,13 +234,6 @@ def handleApply(panel, map):
     else:
         panel.showMessageBox("Error", "Values are invalid!")
 
-
-root = Tk()
-
-root.title('Map')
-Map = MapGUI(root)
-
-
 def toplevel():
     top = Toplevel()
     top.title('Panel')
@@ -250,9 +243,15 @@ def toplevel():
     return top
 
 
+root = Tk()
+
+root.title('Map')
+Map = MapGUI(root)
+
+
 Panel = Panel(toplevel(), 40)
 Panel.applyButton.bind("<Button-1>", lambda event,
-                       panel=Panel, map=Map: handleApply(panel, map))
-
-
-root.mainloop()
+                    panel=Panel, map=Map: handleApply(panel, map))
+def main_gui():
+    root.mainloop()
+main_gui()

@@ -91,16 +91,21 @@ def runARA(time_limit,epsilon = 1.5,heuristic='euclidean',input_method='file',in
         action_process.start()
         action_process.join(timeout=time_limit/1000)
         action_process.terminate()
+def main_ARA_star():
+    if len(sys.argv)!=3:
+        print('Run program with command: <Program name> <input file path> <output file path>')
+    else:
+        time_limit = int(input('Enter time limit: '))
+        epsilon = float(input('Enter start epsilon: '))
+        c = 3
+        while c!=1 and c!=2:
+            c = int(input('Choose heuristic (1: Euclidean, 2: Our heuristic): '))
+        heuristic = 'euclidean'
+        if c==2:
+            heuristic = 'min_step'
+        runARA(time_limit,epsilon = epsilon,heuristic = heuristic,input=sys.argv[1],output=sys.argv[2])
+        if path.getsize(sys.argv[2])==0:
+            f=open(sys.argv[2],'w')
+            f.write('-1')
 if __name__ == '__main__':
-    time_limit = int(input('Enter time limit: '))
-    epsilon = float(input('Enter start epsilon: '))
-    c = 3
-    while c!=1 and c!=2:
-        c = int(input('Choose heuristic (1: Euclidean, 2: Our heuristic): '))
-    heuristic = 'euclidean'
-    if c==2:
-        heuristic = 'min_step'
-    runARA(time_limit,epsilon = epsilon,heuristic = heuristic,input=sys.argv[1],output=sys.argv[2])
-    if path.getsize(sys.argv[2])==0:
-        f=open(sys.argv[2],'w')
-        f.write('-1')
+    main_ARA_star()

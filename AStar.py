@@ -9,18 +9,22 @@ from Utilities import Type
 def A_star(heuristic='euclidean', input_method='file', input='input.txt', output_method='file', output='output.txt', root='abc'):
     find_path = False
     grid_map = Map()
+    #Import map from file or gui
     if input_method == 'file':
         grid_map.import_from_file(input, heuristic)
     elif input_method == 'gui':
         grid_map.import_from_gui(input, heuristic)
-    #grid_map.print_map_value(epsilon=1)
+    
     open_list, closed_list, _ = init_list(grid_map.n)
+    #Insert start to open_list
     open_list.insert_key(grid_map.get_cell(grid_map.start),epsilon=1)
+
     file = None
     if output_method == 'file':
         file = open(output, 'w')
     if output_method == 'gui':
         file = output
+
     while open_list.size > 0:
         q = open_list.extract(epsilon=1)
         closed_list[q.coord.y][q.coord.x] = True
@@ -36,6 +40,7 @@ def A_star(heuristic='euclidean', input_method='file', input='input.txt', output
                 cell.g = q.g + 1
                 cell.parent = q
                 open_list.insert_key(cell,epsilon=1)
+                
                 if output_method == 'gui':
                     time.sleep(0.02)
                     output.map[s.y][s.x].setState(Type.Opened)
@@ -51,14 +56,19 @@ def A_star(heuristic='euclidean', input_method='file', input='input.txt', output
         elif output_method == 'file':
             file.write('-1')
 
+def main_AStar():
+    if len(sys.argv)!=3:
+        print('Run program with command: <Program name> <input file path> <output file path>')
+    else:
+        c = 3
+        while c!=1 and c!=2:
+            c = int(input('Choose heuristic (1: Euclidean, 2: Our heuristic): '))
+        heuristic = 'euclidean'
+        if c==2:
+            heuristic = 'min_step'
+        #start = time.time()
+        A_star(heuristic=heuristic, input=sys.argv[1],input_method='file',output_method='file',output=sys.argv[2])
+        #print(time.time()-start)
 
 if __name__ == '__main__':
-    c = 3
-    while c!=1 and c!=2:
-        c = int(input('Choose heuristic (1: Euclidean, 2: Our heuristic): '))
-    heuristic = 'euclidean'
-    if c==2:
-        heuristic = 'min_step'
-    start = time.time()
-    A_star(heuristic=heuristic, input=sys.argv[1],input_method='file',output_method='file',output=sys.argv[2])
-    print(time.time()-start)
+    main_AStar()
