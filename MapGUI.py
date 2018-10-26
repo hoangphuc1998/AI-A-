@@ -38,6 +38,7 @@ class MapGUI:
 
     def run(self):
         self.disableAllButton()
+        self.reset()
         heuristic = "euclidean"
         if self.Heuristic == "My Heuristic":
             heuristic = "min_step"
@@ -164,7 +165,10 @@ class MapGUI:
         for i in range(self.size):
             for j in range(self.size):
                 if(self.map[i][j].state != Type.Obstacle):
+                    if (self.map[i][j].state == Type.PreviousPaths):
+                        self.map[i][j].setState(Type.Path)
                     self.map[i][j].setState(Type.Empty)
+                    
         self.setEpsilon(self.oldEpsilon)
         
 

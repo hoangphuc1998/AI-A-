@@ -52,7 +52,7 @@ def ARA_star(grid_map,epsilon = 1.5,output_method = 'file',output = 'output.txt'
     if output_method == 'file':
         output = open(output,'w')
     e = infinity
-    minf = infinity
+    minf = grid_map.get_cell(grid_map.start).get_cost(epsilon=1)
     open_list,closed_list,incons_list = init_list(grid_map.n)
     open_list.insert_key(grid_map.get_cell(grid_map.start),epsilon=epsilon)
     minf = improve_path(grid_map,open_list,closed_list,incons_list,minf,epsilon,output_method,output,root)
