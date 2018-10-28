@@ -56,4 +56,4 @@ class Coord:
                 final_list.append(c)
         return final_list
     def print(self):
-        print('('+str(self.x)+','+str(self.y)+')',end = ' ')
+        print('('+str(self.y)+','+str(self.x)+')',end = ' ')

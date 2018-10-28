@@ -36,9 +36,9 @@ class Map:
     def import_from_file(self,filename,heuristic = 'euclidean'):
         with open(filename) as f:
             self.n = int(f.readline())
-            x,y = [int(i) for i in next(f).split()]
+            y,x = [int(i) for i in next(f).split()]
             self.start = Coord(x,y)
-            x,y = [int(i) for i in next(f).split()]
+            y,x = [int(i) for i in next(f).split()]
             self.goal = Coord(x,y)
             for i in range(self.n):
                 line = []
@@ -110,7 +110,7 @@ def print_output(grid_map,q,output_method,file):
     elif output_method=='file':
         file.write(str(q.g+1)+'\n')
         for c in path:
-            file.write('('+str(c.x)+','+str(c.y)+') ')
+            file.write('('+str(c.y)+','+str(c.x)+') ')
         file.write('\n')
         grid_map.print_map(file)
         file.write('\n')

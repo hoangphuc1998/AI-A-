@@ -72,11 +72,11 @@ class Panel(Frame):
               fg="white").grid(row=row, column=0, rowspan=2)
         Label(mainFrame, text="X :", bg="black",
               fg="white").grid(row=row, column=1)
-        Entry(mainFrame, textvariable=self.startX, bg="black", fg="white", insertbackground="white", bd=0, validate="key",
+        Entry(mainFrame, textvariable=self.startY, bg="black", fg="white", insertbackground="white", bd=0, validate="key",
               validatecommand=validateInteger).grid(row=row, column=2)
         Label(mainFrame, text="Y :", bg="black",
               fg="white").grid(row=row, column=3)
-        Entry(mainFrame, textvariable=self.startY, bg="black", fg="white", insertbackground="white", bd=0, validate="key",
+        Entry(mainFrame, textvariable=self.startX, bg="black", fg="white", insertbackground="white", bd=0, validate="key",
               validatecommand=validateInteger).grid(row=row, column=4)
 
     def createGoalField(self, mainFrame, row):
@@ -86,11 +86,11 @@ class Panel(Frame):
               fg="white").grid(row=row, column=0, rowspan=2)
         Label(mainFrame, text="X :", bg="black",
               fg="white").grid(row=row, column=1)
-        Entry(mainFrame, textvariable=self.goalX, bg="black", fg="white", insertbackground="white", bd=0, validate="key",
+        Entry(mainFrame, textvariable=self.goalY, bg="black", fg="white", insertbackground="white", bd=0, validate="key",
               validatecommand=validateInteger).grid(row=row, column=2)
         Label(mainFrame, text="Y :", bg="black",
               fg="white").grid(row=row, column=3)
-        Entry(mainFrame, textvariable=self.goalY, bg="black", fg="white", insertbackground="white", bd=0, validate="key",
+        Entry(mainFrame, textvariable=self.goalX, bg="black", fg="white", insertbackground="white", bd=0, validate="key",
               validatecommand=validateInteger).grid(row=row, column=4)
 
     def createEpsilonField(self, mainFrame, row):
