@@ -52,14 +52,15 @@ def A_star(heuristic='euclidean', input_method='file', input='input.txt', output
         elif output_method == 'file':
             file.write('-1')
 
-
-if __name__ == '__main__':
+def main_AStar():
     c = 3
     while c!=1 and c!=2:
         c = int(input('Choose heuristic (1: Euclidean, 2: Our heuristic): '))
     heuristic = 'euclidean'
     if c==2:
         heuristic = 'min_step'
-    start = time.time()
+    #start = time.time()
     A_star(heuristic=heuristic, input=sys.argv[1],input_method='file',output_method='file',output=sys.argv[2])
-    print(time.time()-start)
+    #print(time.time()-start)
+if __name__ == '__main__':
+    main_AStar()

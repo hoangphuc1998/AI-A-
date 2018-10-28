@@ -24,9 +24,9 @@ class Coord:
     def get_coord(self):
         return self.x, self.y
     def __eq__(self, value):
-            return self.x == value.x and self.y == value.y
+        return self.x == value.x and self.y == value.y
     def __ne__(self, value):
-            return not self.__eq__(value)
+        return not self.__eq__(value)
     # Calculate euclidean distance between 2 cells
     def euclidean_distance(self,c):
         return ((self.x-c.x)**2 + (self.y-c.y)**2)**(1/2)
